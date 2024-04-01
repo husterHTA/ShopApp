@@ -1,4 +1,4 @@
-CREATE DATABASE shopapp;
+
 USE shopapp;
 
 -- Khách hàng khi muốn mua hàng => phải đăng ký tài khoản => bảng users
@@ -15,3 +15,100 @@ CREATE TABLE users (
     facebook_account_id INT DEFAULT 0,
     google_account_id INT DEFAULT 0
 );
+
+ALTER TABLE users ADD COLUMN role_id INT;
+
+CREATE TABLE roles (
+    id INT PRIMARY KEY,
+    name VARCHAR(20) NOT NULL
+);
+
+ALTER TABLE users ADD FOREIGN KEY (role_id) REFERENCES roles(id);
+
+CREATE TABLE tokens (
+	id INT PRIMARY KEY AUTO_INCREMENT,
+	token VARCHAR(255) UNIQUE NOT NULL,
+	token_type VARCHAR(50) NOT NULL,
+	expiration_date DATETIME,
+	revoked TINYINT(1) NOT NULL,
+	expired TINYINT(1) NOT NULL,
+	user_id INT,
+	FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- hỗ trợ đăng nhập từ Facebook và Google
+CREATE TABLE social_accounts (
+	id INT PRIMARY KEY AUTO_INCREMENT,
+	provider VARCHAR(20) NOT NULL COMMENT 'Tên nhà social network',
+	provider_id VARCHAR(50) NOT  NULL,
+	email VARCHAR(150) NOT NULL COMMENT 'Email tài khoản',
+	name VARCHAR(100) NOT NULL COMMENT 'Tên người dùng',
+	user_id INT,
+	FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- bảng danh mục sản phẩm (category)
+CREATE TABLE categories (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL DEFAULT '' COMMENT 'Tên danh mục, vd: đồ điện tử'
+);
+
+
+-- bảng chứa sản phẩm (product): "laptop macbook air 15 inch 2023", iphone 15 pro,...
+CREATE TABLE products (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(350) COMMENT 'Tên sản phẩm',
+    price FLOAT NOT NULL CHECK(price >= 0),
+    thumbnail VARCHAR(300) DEFAULT '',
+    description LONGTEXT DEFAULT '',
+    created_at DATETIME,
+    updated_at DATETIME,
+    category_id INT,
+    FOREIGN KEY (category_id) REFERENCES categories(id)
+);
+
+-- đặt hàng - orders
+create table orders (
+	id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    fullname VARCHAR(100) DEFAULT '',
+    email VARCHAR(100) DEFAULT '',
+    phone_number VARCHAR(20) NOT NULL,
+    address VARCHAR(200) NOT NULL,
+    note VARCHAR(100) DEFAULT '',
+    order_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('pending', 'processing', 'shipped', 'delivered', 'cancelled') COMMENT 'Trạng thái đơn hàng',
+    total_money FLOAT CHECK (total_money >= 0)
+);
+
+ALTER TABLE orders ADD COLUMN `shipping_method` varchar(100);
+ALTER TABLE orders ADD COLUMN `shipping_address` varchar(200);
+ALTER TABLE orders ADD COLUMN `shipping_date` date;
+ALTER TABLE orders ADD COLUMN `tracking_number` varchar(100);
+ALTER TABLE orders ADD COLUMN `payment_method` varchar(100);
+
+CREATE TABLE order_details (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    order_id INT,
+    CONSTRAINT fk_orderdetails_orders FOREIGN KEY (order_id) REFERENCES orders(id),
+    product_id INT,
+    CONSTRAINT fk_orderdetails_products FOREIGN KEY (product_id) REFERENCES products(id),
+    price FLOAT CHECK (price >= 0),
+    number_of_products INT CHECK (number_of_products > 0),
+    total_money FLOAT CHECK (total_money >= 0),
+    color VARCHAR(20) DEFAULT ''
+);
+
+drop table order_details;
+
+SELECT constraint_name
+FROM information_schema.key_column_usage
+WHERE table_name = 'order_details';
+
+
+
+
+
+
+
