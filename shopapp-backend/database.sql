@@ -16,6 +16,14 @@ CREATE TABLE users (
     google_account_id INT DEFAULT 0
 );
 
+create table product_images(
+	id int primary key auto_increment,
+    product_id int,
+    foreign key (product_id) references products(id),
+    constraint fk_product_images_product_id 
+		foreign key (product_id) references products(id) on delete cascade
+);
+
 ALTER TABLE users ADD COLUMN role_id INT;
 
 CREATE TABLE roles (

@@ -1,3 +1,10 @@
 #spring.application.name=shopapp
 server:
   port: 8088
+spring:
+  servlet:
+    multipart:
+      max-file-size: 1000
+      max-request-size: 1000
+api:
+  prefix: api/v1

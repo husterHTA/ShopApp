@@ -5,19 +5,18 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/categories")
+@RequestMapping("${api.prefix}/categories")
 //@Validated
 public class CategoryController {
     //Hiện tất cả các categories
     @GetMapping("")
     public ResponseEntity<String> getAllCategories(
-            @RequestParam("number_of_product") int page,
+            @RequestParam("page") int page,
             @RequestParam("limit") int limit
     ) {
         return ResponseEntity.ok(String.format("getAllCategories, page = %d, limit = %d", page, limit));
